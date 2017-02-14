@@ -1,14 +1,16 @@
 // Author: Kenneth Massada
 const http = require('http');
+var count = 0;
 const handleRequest = (request, response) => {
   console.log('Received request for URL: ' + request.url);
   const headers = request.headers;
   const method = request.method;
   const url = request.url;
   const body = [];
-  var json = JSON.stringify({ 
+  let printPost = false;
+  let json = { 
   	message: "helloWorld"
-  });
+  };
 
   request.on('error', (err) => {
     console.error(err);
@@ -16,16 +18,20 @@ const handleRequest = (request, response) => {
     body.push(chunk);
     console.log('data');
   }).on('end', () => {
-    json = JSON.parse(Buffer.concat(body).toString());
+    count++;
+    console.log(count)
     console.log('end');
-    console.log(json);
+    if (printPost) {
+      json = JSON.parse(Buffer.concat(body).toString());
+      console.log(json);      
+    }
     response.on('error', (err) => {
       console.error(err);
     });
   });
 
   if (request.method === 'POST') {
-   	console.log('post-request');
+    printPost = true;
   }
 
   response.writeHead(200, {
@@ -33,8 +39,8 @@ const handleRequest = (request, response) => {
     'X-Powered-By': 'server-js'
   });
   
-  response.end(json);
+  response.end(JSON.stringify(json));
 
 };
 const www = http.createServer(handleRequest);
-www.listen(80);
+www.listen(8088);
